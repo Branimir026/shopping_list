@@ -30,35 +30,43 @@ class _NewItemState extends State<NewItem> {
       setState(() {
         _isSending = true;
       });
+
       final url = Uri.https(
           'flutter-test-d70d4-default-rtdb.europe-west1.firebasedatabase.app',
           'shopping-list.json');
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'Application/json'},
-        body: json.encode(
-          {
-            'name': _enteredName,
-            'quantity': _enteredQuantity,
-            'category': _selectedCategory.title,
-          },
-        ),
-      );
 
-      final Map<String, dynamic> resData = json.decode(response.body);
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'Application/json'},
+          body: json.encode(
+            {
+              'name': _enteredName,
+              'quantity': _enteredQuantity,
+              'category': _selectedCategory.title,
+            },
+          ),
+        );
 
-      if (!context.mounted) {
-        return;
+        final Map<String, dynamic> resData = json.decode(response.body);
+
+        if (!context.mounted) {
+          return;
+        }
+
+        Navigator.of(context).pop(
+          GroceryItem(
+            id: resData['name'],
+            name: _enteredName,
+            quantity: _enteredQuantity,
+            category: _selectedCategory,
+          ),
+        );
+      } catch (error) {
+        setState(() {
+          _isSending = true;
+        });
       }
-
-      Navigator.of(context).pop(
-        GroceryItem(
-          id: resData['name'],
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory,
-        ),
-      );
     }
   }
 
